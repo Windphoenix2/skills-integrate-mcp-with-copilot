@@ -86,10 +86,6 @@ def root():
 
 
 @app.get("/activities")
-from typing import Optional
-from fastapi import Query
-
-@app.get("/activities")
 def get_activities(
     search: Optional[str] = Query(None, description="Search activities by name or description"),
     sort: Optional[str] = Query(None, description="Sort by 'name' or 'schedule'"),
