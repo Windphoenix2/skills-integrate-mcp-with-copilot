@@ -1,17 +1,44 @@
 document.addEventListener("DOMContentLoaded", () => {
+
   const activitiesList = document.getElementById("activities-list");
   const activitySelect = document.getElementById("activity");
   const signupForm = document.getElementById("signup-form");
   const messageDiv = document.getElementById("message");
+  // Filter/sort/search controls
+  const filterContainer = document.createElement("div");
+  filterContainer.className = "filter-container";
+  filterContainer.innerHTML = `
+    <input type="text" id="search-query" placeholder="Search activities..." />
+    <select id="sort-select">
+      <option value="">Sort by...</option>
+      <option value="name">Name</option>
+      <option value="schedule">Schedule</option>
+    </select>
+    <button id="filter-btn">Apply</button>
+  `;
+  activitiesList.parentNode.insertBefore(filterContainer, activitiesList);
 
-  // Function to fetch activities from API
+  // State for filters
+  let currentSearch = "";
+  let currentSort = "";
+
+  // Function to fetch activities from API with filters
   async function fetchActivities() {
     try {
-      const response = await fetch("/activities");
+      const params = new URLSearchParams();
+      if (currentSearch) params.append("search", currentSearch);
+      if (currentSort) params.append("sort", currentSort);
+      const url = params.toString() ? `/activities?${params.toString()}` : "/activities";
+      const response = await fetch(url);
       const activities = await response.json();
 
-      // Clear loading message
+      // Clear loading message and dropdown
       activitiesList.innerHTML = "";
+      activitySelect.innerHTML = "";
+      const defaultOption = document.createElement("option");
+      defaultOption.value = "";
+      defaultOption.textContent = "-- Select an activity --";
+      activitySelect.appendChild(defaultOption);
 
       // Populate activities list
       Object.entries(activities).forEach(([name, details]) => {
@@ -66,6 +93,13 @@ document.addEventListener("DOMContentLoaded", () => {
       console.error("Error fetching activities:", error);
     }
   }
+
+  // Filter/sort/search event
+  document.getElementById("filter-btn").addEventListener("click", () => {
+    currentSearch = document.getElementById("search-query").value;
+    currentSort = document.getElementById("sort-select").value;
+    fetchActivities();
+  });
 
   // Handle unregister functionality
   async function handleUnregister(event) {
