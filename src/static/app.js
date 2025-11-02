@@ -25,9 +25,10 @@ document.addEventListener("DOMContentLoaded", () => {
   // Function to fetch activities from API with filters
   async function fetchActivities() {
     try {
-      let url = "/activities?";
-      if (currentSearch) url += `search=${encodeURIComponent(currentSearch)}&`;
-      if (currentSort) url += `sort=${encodeURIComponent(currentSort)}&`;
+      const params = new URLSearchParams();
+      if (currentSearch) params.append("search", currentSearch);
+      if (currentSort) params.append("sort", currentSort);
+      const url = params.toString() ? `/activities?${params.toString()}` : "/activities";
       const response = await fetch(url);
       const activities = await response.json();
 
